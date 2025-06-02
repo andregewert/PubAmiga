@@ -27,7 +27,7 @@ var
     TemplateFileName: String;
     TemplateString: String;
     MarkdownDialect: TMarkdownDialect;
-    Encoding: String = 'ISO-8859-1';
+    Encoding: String = 'Amiga-1251';
     HtmlTitle: String = 'Title';
     inputString: String;
     outputString: String;
