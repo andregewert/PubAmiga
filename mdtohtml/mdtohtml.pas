@@ -22,14 +22,18 @@ type
 procedure TMdToHtml.DoRun;
 var
     ErrorMsg: String;
-{    i: integer; }
     InputFileName: String;
     OutputFileName: String;
+    TemplateFileName: String;
+    TemplateString: String;
+    MarkdownDialect: TMarkdownDialect;
+    Encoding: String = 'ISO-8859-1';
+    HtmlTitle: String = 'Title';
     inputString: String;
     outputString: String;
     md: TMarkdownProcessor;
 begin
-    ErrorMsg := CheckOptions('hfo', ['help', 'file', 'outfile']);
+    ErrorMsg := CheckOptions('hfomet', ['help', 'file', 'outfile', 'mode', 'encoding', 'template']);
     if ErrorMsg <> '' then begin
         ShowException(Exception.Create(ErrorMsg));
         Terminate;
@@ -42,6 +46,7 @@ begin
         Exit;
     end;
 
+    { Input file }
     if NOT HasOption('f', 'file') then begin
         WriteHelp;
         Terminate;
@@ -51,28 +56,64 @@ begin
     if HasOption('f', 'file') then begin
         InputFileName := getOptionValue('f', 'file');
     end;
+
+    { Markdown dialect }
+    if HasOption('m', 'mode') then begin
+        Case LowerCase(getOptionValue('m', 'mode')) of
+            'daringfireball': MarkdownDialect := mdDaringFireball;
+            'txtmark': MarkdownDialect := mdTxtMark;
+            'commonmark': MarkdownDialect := mdCommonMark;
+            'asciidoc': MarkdownDialect := mdAsciiDoc;
+        else
+            begin
+                WriteLn('Unknown markdown dialect: ', getOptionValue('m', 'mode'));
+                WriteHelp;
+                Exit;
+            end;
+        end;
+    end;
     
+    { Output file }
     if HasOption('o', 'outfile') then begin
         OutputFileName := getOptionValue('o', 'outfile');
     end;
     
-{
-    for i := 0 to getEnvironmentVariableCount() -1 do begin
-        writeln(getEnvironmentString(i));
+    { Encoding }
+    if HasOption('e', 'encoding') then begin
+        Encoding := getOptionValue('e', 'encoding');
     end;
-}
+    
+    { Template file }
+    if HasOption('t', 'template') then begin
+        TemplateFileName := getOptionValue('t', 'template');
+    end;
 
-    md := TMarkdownProcessor.createDialect(mdDaringFireball);
-    md.UnSafe := true;
-    
+    md := TMarkdownProcessor.createDialect(MarkdownDialect);
+    md.UnSafe := true;   
     inputString := readFile(inputFileName);
-    
     outputString := md.process(inputString);
     
-    if OutputFileName = '' then begin
-        writeln(outputString);
+    { Output template }
+    if TemplateFileName = '' then begin
+        TemplateString := '<!DOCTYPE html>' +
+        '<html><head>' +
+        '<meta charset="$encoding$" />' +
+        '<title>$title$</title>' +
+        '</head>' +
+        '<body>$body$</body>' +
+        '</html>';
     end else begin
-        writeFile(OutputFileName, outputString);
+        TemplateString := readFile(TemplateFileName);
+    end;
+    
+    TemplateString := StringReplace(TemplateString, '$title$', HtmlTitle, [rfIgnoreCase, rfReplaceAll]);
+    TemplateString := StringReplace(TemplateString, '$encoding$', Encoding, [rfIgnoreCase, rfReplaceAll]);
+    TemplateString := StringReplace(TemplateString, '$body$', outputString, [rfIgnoreCase]);
+    
+    if OutputFileName = '' then begin
+        writeln(TemplateString);
+    end else begin
+        writeFile(OutputFileName, TemplateString);
     end;
     
     Terminate;
@@ -91,8 +132,7 @@ end;
 
 procedure TMdToHtml.WriteHelp;
 begin
-    { mdtohtml -f inputfile [-o outputfile] }
-    writeln('Usage: ', ExeName, ' -h');
+    writeln('Usage: mdtohtml [-h|--help] -f|--file <input file> [-o|--outfile <output file>] [-m|--mode <markdown mode>] [-e|--encoding <character encoding>] [-t|--template <template file>]');
 end;
 
 function TMdToHtml.readFile(filename: string): string;

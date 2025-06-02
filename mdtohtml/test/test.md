@@ -4,7 +4,7 @@
 
 This is a simple test file.
 ---
-Formatting: *emphasised* and **bold** and __underlined__.
+Formatting: *emphasised* and **bold** and _underlined_.
 
 * Simple list
 * List
