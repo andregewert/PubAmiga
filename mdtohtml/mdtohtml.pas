@@ -2,7 +2,6 @@ program mdtohtml;
 
 {$mode objfpc}{$H+}
 
-
 uses
     Classes, SysUtils, CustApp, MarkdownProcessor, MarkdownUtils;
 	
@@ -33,7 +32,7 @@ var
     outputString: String;
     md: TMarkdownProcessor;
 begin
-    ErrorMsg := CheckOptions('hfomet', ['help', 'file', 'outfile', 'mode', 'encoding', 'template']);
+    ErrorMsg := CheckOptions('hfomets', ['help', 'file', 'outfile', 'mode', 'encoding', 'template', 'stdin']);
     if ErrorMsg <> '' then begin
         ShowException(Exception.Create(ErrorMsg));
         Terminate;
@@ -47,7 +46,7 @@ begin
     end;
 
     { Input file }
-    if NOT HasOption('f', 'file') then begin
+    if NOT HasOption('f', 'file') AND NOT HasOption('s', 'stdin') then begin
         WriteHelp;
         Terminate;
         Exit;
@@ -89,8 +88,16 @@ begin
     end;
 
     md := TMarkdownProcessor.createDialect(MarkdownDialect);
-    md.UnSafe := true;   
-    inputString := readFile(inputFileName);
+    md.UnSafe := true;
+    if HasOption('s', 'stdin') then begin
+        reset(input);
+        while NOT EOF(input) do begin
+            readln(input, inputString);
+        end;
+        close(input);
+    end else begin
+        inputString := readFile(inputFileName);
+    end;
     outputString := md.process(inputString);
     
     { Output template }
@@ -132,7 +139,7 @@ end;
 
 procedure TMdToHtml.WriteHelp;
 begin
-    writeln('Usage: mdtohtml [-h|--help] -f|--file <input file> [-o|--outfile <output file>] [-m|--mode <markdown mode>] [-e|--encoding <character encoding>] [-t|--template <template file>]');
+    writeln('Usage: mdtohtml [-h|--help] (-f|--file <input file>|-s|--stdin) [-o|--outfile <output file>] [-m|--mode <markdown mode>] [-e|--encoding <character encoding>] [-t|--template <template file>]');
 end;
 
 function TMdToHtml.readFile(filename: string): string;
