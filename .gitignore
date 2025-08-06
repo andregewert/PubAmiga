@@ -42,7 +42,7 @@
 *.idb
 *.pdb
 
-# UAE fiked
+# UAE files
 *.uaem
 
 # Build directories
