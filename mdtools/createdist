@@ -1,0 +1,8 @@
+echo "Create distribution ..."
+
+mkdir mdtools
+mkdir mdtools/files
+copy build/mdtohtml mdtools/files
+copy ALL rexx mdtools/rexx
+copy ENVARC:Sys/def_drawer.info mdtools.info
+lha -r a mdtools.lha mdtools.info mdtools

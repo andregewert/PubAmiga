@@ -17,11 +17,18 @@ prepare:
 .PHONY: clean
 clean:
 	rm -r build
+	rm -r mdtools
+	rm mdtools.info
+	rm mdtools.lha
 
 .PHONY: test
 test: mdtohtml
 	build/mdtohtml -f test/test.md -t test/template.html
 
-mdtohtml: prepare mdtohtml.pas
-	$(fpc) $(fpcopts) mdtohtml.pas -FEbuild/
+mdtohtml: prepare src/mdtohtml.pas
+	$(fpc) $(fpcopts) src/mdtohtml.pas -FEbuild/
 
+.PHONY:	dist
+dist:
+	execute createdist
+	
