@@ -10,7 +10,7 @@ SIGNAL ON BREAK_C
 
 args.displayFile = ''
 PARSE ARG args.displayFile
-Call dumpVar('args.displayFile')
+/*Call dumpVar('args.displayFile')*/
 
 call Init
 call CreateApp
@@ -21,10 +21,6 @@ call HandleApp
 
 /***********************************************************************/
 Init: procedure expose global. args.
-    /*
-    Say ProgDir()
-    call pragma("D",ProgDir())
-    */
     l="rmh.library";if ~show("L",l) then;if ~addlib(l,0,-30) then exit
     if AddLibrary("rxmui.library")~=0 then exit
     if AddLibrary("rxasl.library")~=0 then exit
@@ -33,7 +29,7 @@ Init: procedure expose global. args.
     global.currentFile = ''
 return
     
-/***********************************************************************/
+/* <fold> CreateApp */
 CreateApp: procedure expose global.
 
     app.Title="Markdown editor"
@@ -59,17 +55,7 @@ CreateApp: procedure expose global.
             thebargroup.DragBar=0
             thebargroup.AutoID=1
             thebargroup.ViewMode="GFX"
-            
-            /*
-            thebargroup.Pics.0="document_empty.png"
-            thebargroup.Pics.1="folder_page.png"
-            thebargroup.Pics.2="arrow_rotate_clockwise.png"
-            thebargroup.Pics.3="file_save_as.png"
-            thebargroup.Pics.4="file_save_as.png"
-            thebargroup.Pics.5="html_5.png"
-            thebargroup.Pics.6="info_rhombus.png"
-            */
-            
+
             thebargroup.Pics.0="TBImages:new"
             thebargroup.Pics.1="TBImages:open"
             thebargroup.Pics.2="TBImages:refresh"
@@ -174,6 +160,7 @@ CreateApp: procedure expose global.
 
     call set("win","open",1)
 return
+/* </fold> */
 
 /***********************************************************************/
 HandleApp: procedure expose global.
